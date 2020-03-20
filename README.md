@@ -8,6 +8,8 @@
 - Added GET/POST method into RAML.
 test-example-2020
 -> test-example-2020\src\main\resources\Test-Example-2020.raml
+- get call endpoint - /songs, /songs/{songId}
+- get call endpoint - /file-content and post call end point /file-content
 
 2. Exercise 2: Implement a REST API using APIkit
 Use APIkit to create implementation flows.
@@ -16,3 +18,5 @@ Use APIkit to create implementation flows.
 
 training-demo
 training-demo\src\main\resources\training-demo.raml
+ -post call endpoint - /postcall
+ -get call endpoint - /getcall
