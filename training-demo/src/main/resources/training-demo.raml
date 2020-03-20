@@ -1,0 +1,65 @@
+#%RAML 1.0
+baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/326a414f-fa64-4f99-b76a-00dac002c179/ # 
+title: training-demo
+description: Training API Demo
+version: v1
+types:
+  User:
+    type: object
+    properties:
+      name: string
+      lastname: string
+    example:
+      name: Bob
+      lastname: Marley
+  Org:
+    type: object
+    properties:
+      name: string
+      address?: string
+      value?: string
+/postcall:
+  post:
+    headers:
+      UserID:
+        description: the identifier for the user who posts a new organization
+        type: string
+        example: SWED-123 # single scalar example
+    body:
+      application/json:
+        type: Org
+        example: # single request body example
+          value: # needs to be declared since instance contains a 'value' property
+            name: Doe Enterprise
+            value: Silver
+/getcall:
+  get:
+    displayName: Training demo
+    description: Hello Guys you are in Training Demo
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              [{
+              "id": 1,
+              "name": "Ram Prajapati",
+              "username": "ram_prajapati",
+              "email": "ram.prajapati@publicissapient.com",
+              "address": {
+                "street": "Oxygen Business Park",
+                "suite": "Plot 7, Tower C",
+                "city": "Noida",
+                "zipcode": "201306",
+                "geo": {
+                  "lat": "-27.3159",
+                  "lng": "61.1496"
+                }
+              },
+              "phone": "0120-25364000",
+              "website": "publicis.sapient.com",
+              "company": {
+                "name": "Publicis Sapient",
+                "catchPhrase": "Multi-layered client-server neural-net",
+                "bs": "Sapient Global Market"
+              } }]
