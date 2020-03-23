@@ -1,0 +1,77 @@
+#%RAML 1.0
+baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/e37745be-01d3-4204-9c21-5fb70491f409/ # 
+title: Sample-App
+version: 1.0.development
+/users:
+  get:
+    queryParameters:
+      destination:
+        required: false
+        enum:
+          - SFO
+          - LAX
+          - CLE
+          - HFG
+    description: Retrieve a list of all the users
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              [{
+              "id": 1,
+              "name": "Ram Prajapati",
+              "username": "ram_prajapati",
+              "email": "ram.prajapati@publicisgroupe.com",
+              "address": {
+                "street": "Oxygen Business Park",
+                "suite": "Plot 7,Tower C",
+                "city": "Noida",
+                "zipcode": "210306",
+                "geo": {
+                  "lat": "-17.3159",
+                  "lng": "61.1496"
+                }
+              },
+              "destination": "SFO",
+              "phone": "0120-253438400",
+              "website": "publicisapient.com",
+              "company": {
+                "name": "Publicis sapient",
+                "bs": "harness real-time e-markets"
+              } }]
+  /userbyid:
+    get:
+      description: Get information about a particular user
+      queryParameters:
+        id:
+          description: Specify the id of the user you want to retrieve
+          type:        integer
+          required:    false
+          example: 3
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                [{
+                "id": 3,
+                "name": "",
+                "username": "Bijayalaxmi",
+                "email": "blaxmi@publicissapient.com",
+                "address": {
+                  "street": "Banglore",
+                  "suite": "Street 89",
+                  "city": "Banglore",
+                  "zipcode": "4884343",
+                  "geo": {
+                    "lat": "-28.6102",
+                    "lng": "-27.0653"
+                  }
+                },
+                "phone": "80-7838382774743",
+                "website": "publicissapient.com",
+                "company": {
+                  "name": "Publicis Sapient",
+                  "bs": "e-enable strategic applications"
+                } }]
