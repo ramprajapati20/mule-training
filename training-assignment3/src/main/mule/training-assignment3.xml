@@ -10,10 +10,10 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
 	<db:config name="Database_Config" doc:name="Database Config" doc:id="10d9469e-5740-440d-bcff-c0e293db1c72" >
-		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="sakila" />
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="TRAINING" />
 	</db:config>
 	<db:config name="Database_Config1" doc:name="Database Config" doc:id="2262c48d-ca26-4cf0-b79e-2dafa2c3b982" >
-		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="sakila" />
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="TRAINING" />
 	</db:config>
 	<flow name="training-assignment3Flow" doc:id="33e1bcce-c2a8-47e9-8e55-b57fba22951f" >
 		<http:listener doc:name="Listener" doc:id="59fccf93-c496-423b-ab34-a03782cf8e2a" config-ref="HTTP_Listener_config" path="/api/employee" allowedMethods="GET"/>
@@ -21,7 +21,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<choice doc:name="Choice" doc:id="8cfa6aac-8e88-4bad-bd93-3b79a9a34302" >
 			<when expression="#[vars.empnoVar !='']">
 				<db:select doc:name="Select" doc:id="91768b2f-1846-441b-9188-51f9d653f56d" config-ref="Database_Config">
-					<db:sql >select * from sakila.emp where empno=:empno</db:sql>
+					<db:sql >SELECT * FROM TRAINING.EMP WHERE EMPNO=:empno</db:sql>
 					<db:input-parameters ><![CDATA[#[{
 	empno:vars.empnoVar
 }]]]></db:input-parameters>
@@ -29,7 +29,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 			</when>
 			<otherwise >
 				<db:select doc:id="4e95bc51-fd3c-4faf-a229-bff1a5be7c07" config-ref="Database_Config">
-			<db:sql>select * from sakila.emp;</db:sql>
+			<db:sql>SELECT * FROM TRAINING.EMP;</db:sql>
 		</db:select>
 			</otherwise>
 		</choice>
@@ -43,7 +43,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 	<flow name="training-assignment3Flow1" doc:id="f99d8f28-30dc-433d-a4ba-16983dfc6b7e" >
 		<http:listener doc:name="Listener" doc:id="bcc327c2-421d-4608-93af-4eff1313c4d0" config-ref="HTTP_Listener_config" path="/api/employee" allowedMethods="POST"/>
 		<db:insert doc:name="Insert" doc:id="36e4d250-beba-4af5-aa74-d83e424a96f9" config-ref="Database_Config">
-			<db:sql >INSERT INTO SAKILA.EMP(EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO) VALUES (:EMPNO, :ENAME, :JOB, :MGR, :HIREDATE, :SAL, :COMM, :DEPTNO)</db:sql>
+			<db:sql >INSERT INTO TRAINING.EMP(EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO) VALUES (:EMPNO, :ENAME, :JOB, :MGR, :HIREDATE, :SAL, :COMM, :DEPTNO)</db:sql>
 			<db:input-parameters ><![CDATA[#[{
 	ENAME:payload.ENAME,
 	JOB:payload.JOB,
@@ -71,7 +71,7 @@ output application/json
 		<http:listener doc:name="Listener" doc:id="4551a100-8fc5-45bf-9014-5f37011c9da6" config-ref="HTTP_Listener_config" path="/api/employee" allowedMethods="PATCH"/>
 		<set-variable value="#[attributes.queryParams.EMPNO]" doc:name="Set Variable" doc:id="2c4a5425-1b71-4e28-8913-4d1c56ba42af" variableName="empVar"/>
 		<db:update doc:name="Update" doc:id="e601051e-c212-4b65-9b48-a9c9fecb7499" config-ref="Database_Config">
-			<db:sql >UPDATE SAKILA.EMP SET ENAME =:ENAME AND JOB =:JOB AND MGR =:MGR AND HIREDATE =:HIREDATE AND SAL =:SAL AND COMM =:COMM WHERE EMPNO =:EMPNO;
+			<db:sql >UPDATE TRAINING.EMP SET ENAME =:ENAME AND JOB =:JOB AND MGR =:MGR AND HIREDATE =:HIREDATE AND SAL =:SAL AND COMM =:COMM WHERE EMPNO =:EMPNO;
 </db:sql>
 			<db:input-parameters ><![CDATA[#[{
 	ENAME:payload.ENAME,
@@ -99,7 +99,7 @@ output application/json
 		<http:listener doc:name="Listener" doc:id="cf6d9e15-817f-4a56-a1bb-4ddca7a79b32" config-ref="HTTP_Listener_config" path="/api/employee" allowedMethods="DELETE"/>
 		<set-variable value="#[attributes.queryParams.EMPNO]" doc:name="Set Variable" doc:id="cd013ab7-87ec-4758-b3a1-ff9b6b4a8c0c" variableName="EMPNO"/>
 		<db:delete doc:name="Delete" doc:id="edda5438-db41-4e91-8b68-44dbce0069d9" config-ref="Database_Config">
-			<db:sql >DELETE FROM SAKILA.EMP WHERE EMPNO=:EMPNO</db:sql>
+			<db:sql >DELETE FROM TRAINING.EMP WHERE EMPNO=:EMPNO</db:sql>
 			<db:input-parameters ><![CDATA[#[{
  EMPNO:vars.EMPNO
 }]]]></db:input-parameters>
