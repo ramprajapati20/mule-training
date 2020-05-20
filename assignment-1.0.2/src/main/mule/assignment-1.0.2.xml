@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
+	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config
+		name="HTTP_Listener_Configuration" host="localhost" port="8089"
+		doc:name="HTTP Listener Configuration" basePath="/">
+		<http:listener-connection host="0.0.0.0" port="8082" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="8b0f96fb-89b0-41a7-918c-ac71581070bf" >
+		<http:request-connection host="httpbin.org" port="80" />
+	</http:request-config>
+	<apikit:config outboundHeadersMapName="outboundHeadersMapName" httpStatusVarName="httpStatus" doc:name="Router" doc:id="229825c9-b3ff-474b-8257-ea0043a75892" name="mule-mq-assignment-2.0-config" api="resource::e1d4b75d-dc39-4842-b6bf-98676296c056:mule-mq-assignment-02:1.0.0:raml:zip:mule-mq-assignment-02.raml" />
+	<jms:config name="JMS_Config" doc:name="JMS Config" doc:id="d4a1ce20-a218-426e-ae27-1b5b0279fd74" >
+		<jms:active-mq-connection />
+	</jms:config>
+	<flow name="mule-publish-mq-user" doc:id="afd33e62-8268-4688-baff-efab6191b3d5" >
+		<http:listener doc:name="Listener" doc:id="94b1aedb-2fba-435e-8b67-62a60c714850" config-ref="HTTP_Listener_Configuration" path="/api/*" >
+			<http:response statusCode="#[vars.httpStatus default 200]" >
+				<http:headers ><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+			</http:response>
+			<http:error-response statusCode="#[vars.httpStatus default 500]" >
+				<http:body ><![CDATA[#[payload]]]></http:body>
+				<http:headers ><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+			</http:error-response>
+		</http:listener>
+		<apikit:router doc:name="APIkit Router" doc:id="bec6ca8c-2ba8-42e1-af4e-1f728593ba14" config-ref="mule-mq-assignment-2.0-config" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="f94f5775-ae6a-4350-ac36-d77b1ccc6e04" type="APIKIT:BAD_REQUEST" >
+				<ee:transform doc:name="Transform Message" doc:id="e0b78436-2fef-4b77-a311-5521116b353e" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="aa800b7a-0f59-4fd9-83ba-d883ee2bcd2a" type="APIKIT:NOT_FOUND" >
+				<ee:transform doc:name="Transform Message" doc:id="076eb33e-1111-41c1-b021-9f1ea6c72f14" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[404]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="95b73eb7-b7d9-4673-8ebe-cabbdbe499c4" type="APIKIT:METHOD_NOT_ALLOWED" >
+				<ee:transform doc:name="Transform Message" doc:id="0eb17a24-e9e6-444f-878b-097e8546da20" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[405]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="Copy_of_On Error Propagate" doc:id="512b0c6d-e635-4b0d-aede-de50828213b1" type="APIKIT:NOT_ACCEPTABLE" >
+				<ee:transform doc:name="Transform Message" doc:id="c8cb9dc1-c781-47ee-bd6f-2b799ef806c2" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[406]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="620e7a8b-d9c8-4cbb-8a7b-3d8e2445b7db" type="APIKIT:UNSUPPORTED_MEDIA_TYPE" >
+				<ee:transform doc:name="Transform Message" doc:id="2195a7d1-f367-44d6-94dc-18e0e9e76076" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[415]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d294ffa8-167a-4736-948e-fe5adaabe148" type="APIKIT:NOT_IMPLEMENTED" >
+				<ee:transform doc:name="Transform Message" doc:id="699147c4-7ed1-4013-a4e6-235abe2a30c8" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[501]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="post:\user:mule-mq-assignment-02-config" doc:id="f9fc74da-e6af-4793-847f-40c04af8f1d1" >
+		<ee:transform doc:name="Transform Message" doc:id="d4c4a39e-cb74-4723-bab0-201127173694" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<jms:publish doc:name="Publish" doc:id="37ac3bd1-f4ef-4195-8b02-b7742b0efed6" destination="inq" config-ref="JMS_Config"/>
+	</flow>
+	<flow name="mule-consume-user" doc:id="137c8cc1-be12-4c53-9b75-ed7f3c893060" >
+		<jms:listener doc:name="Listener" doc:id="cae279b4-aaea-4a97-89f5-3725829e0e7f" destination="inq" />
+		<logger level="INFO" doc:name="Logger" doc:id="d823d51a-2ff4-450e-8e82-56dc8b5f8bbd" message="#[payload]" />
+		<http:request method="GET" doc:name="Request" doc:id="efd911e7-9605-4111-ae1e-bab155dda067" config-ref="HTTP_Request_configuration" path="/get" />
+	</flow>
+
+</mule>
